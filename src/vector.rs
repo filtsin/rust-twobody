@@ -1,7 +1,10 @@
 use ndarray::{ArrayView1, ArrayViewMut1, IntoNdProducer, Ix1, NdProducer};
-use std::ops::{Add, Deref, DerefMut, Div, Mul, Sub};
-use std::convert::{AsRef, AsMut, From};
 use std::fmt::Display;
+use std::ops::{Add, Deref, DerefMut, Div, Mul, Sub};
+use std::{
+    convert::{AsMut, AsRef, From},
+    ops::AddAssign,
+};
 
 #[derive(Debug, Clone, Copy)]
 pub struct Vector<T, const N: usize> {
@@ -194,18 +197,18 @@ impl<T, const N: usize> From<[T; N]> for Vector<T, N> {
 
 impl<T, const N: usize> Display for Vector<T, N>
 where
-    T: Display
+    T: Display,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         if self.len() >= 1 {
             write!(f, "{}", self.data[0])?;
         }
-        
+
         for i in 1..self.len() {
             write!(f, ",{}", self.data[i])?;
         }
 
-       Ok(()) 
+        Ok(())
     }
 }
 

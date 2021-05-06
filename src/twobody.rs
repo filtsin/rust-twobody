@@ -1,9 +1,9 @@
 use ndarray::Zip;
-use std::{fmt::Debug, marker::PhantomData, ops::Deref};
 use std::fmt::Display;
+use std::{fmt::Debug, marker::PhantomData, ops::Deref};
 
 use crate::{
-    methods::{rk4::Rk4, euler::Euler},
+    methods::{euler::Euler, rk4::Rk4, rk45::Rk45, ab2::Ab2, am2::Am2},
     soe::{Soe, Soe2, Soe2Builder},
     vector::{Vector, Vector2, Vector3, Vector5, Vector7},
 };
@@ -60,23 +60,11 @@ impl<const N: usize> Display for Position<N> {
 
 impl TwoBodyReader<2> {
     pub fn get(&self, data: Vector<VType, 5>) -> Position<2> {
-        let mut body1 = Vector::<VType, 2>::new();
-        Zip::from(&mut body1)
-            .and(&self.a)
-            .and(&self.b)
-            .and(&data[1..3])
-            .for_each(|res, &a, &b, &r| {
-                *res = ((a * data[0] + b) - (self.m2 * r)) / (self.m1 + self.m2)
-            });
+        let r: Vector<VType, 2> = [data[1], data[2]].into();
 
-        let mut body2 = Vector::<VType, 2>::new();
-        Zip::from(&mut body2)
-            .and(&self.a)
-            .and(&self.b)
-            .and(&data[1..3])
-            .for_each(|res, &a, &b, &r| {
-                *res = ((a * data[0] + b) + (self.m2 * r)) / (self.m1 + self.m2)
-            });
+        let body1 = ((self.a * data[0] + self.b) - r * self.m2) / (self.m1 + self.m2);
+
+        let body2 = ((self.a * data[0] + self.b) - r * self.m2) / (self.m1 + self.m2);
 
         Position { body1, body2 }
     }
@@ -84,23 +72,11 @@ impl TwoBodyReader<2> {
 
 impl TwoBodyReader<3> {
     pub fn get(&self, data: Vector<VType, 7>) -> Position<3> {
-        let mut body1 = Vector::<VType, 3>::new();
-        Zip::from(&mut body1)
-            .and(&self.a)
-            .and(&self.b)
-            .and(&data[1..4])
-            .for_each(|res, &a, &b, &r| {
-                *res = ((a * data[0] + b) - (self.m2 * r)) / (self.m1 + self.m2)
-            });
+        let r: Vector<VType, 3> = [data[1], data[2], data[3]].into();
 
-        let mut body2 = Vector::<VType, 3>::new();
-        Zip::from(&mut body2)
-            .and(&self.a)
-            .and(&self.b)
-            .and(&data[1..4])
-            .for_each(|res, &a, &b, &r| {
-                *res = ((a * data[0] + b) + (self.m2 * r)) / (self.m1 + self.m2)
-            });
+        let body1 = ((self.a * data[0] + self.b) - r * self.m2) / (self.m1 + self.m2);
+
+        let body2 = ((self.a * data[0] + self.b) - r * self.m2) / (self.m1 + self.m2);
 
         Position { body1, body2 }
     }
@@ -121,15 +97,12 @@ impl TwoBodySystem<2> {
 
         let f2 = move |args: &Vector<VType, 5>| {
             let mut result = Vector::<VType, 2>::new();
-            let r = &args[1..3];
+            let r: Vector<VType, 2> = [args[1], args[2]].into();
 
             let sum_sq = r[0].powi(2) + r[1].powi(2);
             let len_inpow3 = sum_sq * sum_sq.sqrt();
 
-            Zip::from(&mut result).and(r).for_each(|res, &r| {
-                *res = -self.g * (self.body1.m + self.body2.m) * r / len_inpow3;
-            });
-            result
+            r * (self.body1.m + self.body2.m) * -self.g / len_inpow3
         };
 
         Soe2Builder::<f64, 5, 2>::new().build(f1, f2)
@@ -184,6 +157,18 @@ impl TwoBodySystem<2> {
     pub fn construct_euler(&self, h: VType) -> impl Iterator<Item = Vector<VType, 5>> {
         Euler::new(self.get_init(), self.generate_soe(), h)
     }
+
+    pub fn construct_rk45(&self, h: VType, e: VType, max: VType) -> impl Iterator<Item = Vector<VType, 5>> {
+        Rk45::new(self.get_init(), self.generate_soe(), h, e, max)
+    }
+
+    pub fn construct_ab2(&self, h: VType, init2: Vector<VType, 5>) -> impl Iterator<Item = Vector<VType, 5>> {
+        Ab2::new(self.get_init(), init2, self.generate_soe(), h)
+    }
+
+    pub fn construct_am2(&self, h: VType, init2: Vector<VType, 5>) -> impl Iterator<Item = Vector<VType, 5>> {
+        Am2::new(self.get_init(), init2, self.generate_soe(), h)
+    }
 }
 
 impl TwoBodySystem<3> {
@@ -195,15 +180,12 @@ impl TwoBodySystem<3> {
 
         let f2 = move |args: &Vector<VType, 7>| {
             let mut result = Vector::<VType, 3>::new();
-            let r = &args[1..4];
+            let r: Vector<VType, 3> = [args[1], args[2], args[3]].into();
 
             let sum_sq = r[0].powi(2) + r[1].powi(2) + r[2].powi(3);
             let len_inpow3 = sum_sq * sum_sq.sqrt();
 
-            Zip::from(&mut result).and(r).for_each(|res, &r| {
-                *res = -self.g * (self.body1.m + self.body2.m) * r / len_inpow3;
-            });
-            result
+            r * (self.body1.m + self.body2.m) * -self.g / len_inpow3
         };
 
         Soe2Builder::<VType, 7, 3>::new().build(f1, f2)
@@ -256,5 +238,17 @@ impl TwoBodySystem<3> {
 
     pub fn construct_euler(&self, h: VType) -> impl Iterator<Item = Vector<VType, 7>> {
         Euler::new(self.get_init(), self.generate_soe(), h)
+    }
+
+    pub fn construct_rk45(&self, h: VType, e: VType, max: VType) -> impl Iterator<Item = Vector<VType, 7>> {
+        Rk45::new(self.get_init(), self.generate_soe(), h, e, max)
+    }
+
+    pub fn construct_ab2(&self, h: VType, init2: Vector<VType, 7>) -> impl Iterator<Item = Vector<VType, 7>> {
+        Ab2::new(self.get_init(), init2, self.generate_soe(), h)
+    }
+
+    pub fn construct_am2(&self, h: VType, init2: Vector<VType, 7>) -> impl Iterator<Item = Vector<VType, 7>> {
+        Am2::new(self.get_init(), init2, self.generate_soe(), h)
     }
 }
