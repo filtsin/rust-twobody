@@ -2,7 +2,7 @@ use crate::soe::Soe;
 use ndarray::Zip;
 use std::{
     iter::Iterator,
-    ops::{Add, Div, Mul, Sub}
+    ops::{Add, Div, Mul, Sub},
 };
 
 use super::call_soe;
@@ -16,7 +16,12 @@ pub struct Am2<T, S> {
 
 impl<T, S> Am2<T, S> {
     pub fn new(init1: T, init2: T, soe: S, h: f64) -> Self {
-        Self { init1, init2, soe, h }
+        Self {
+            init1,
+            init2,
+            soe,
+            h,
+        }
     }
 }
 
@@ -30,7 +35,7 @@ where
         + Add<T, Output = T>
         + Mul<f64, Output = T>
         + Div<f64, Output = T>
-        + Sub<T, Output = T>
+        + Sub<T, Output = T>,
 {
     type Item = T;
 

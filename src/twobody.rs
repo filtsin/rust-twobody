@@ -3,7 +3,7 @@ use std::fmt::Display;
 use std::{fmt::Debug, marker::PhantomData, ops::Deref};
 
 use crate::{
-    methods::{euler::Euler, rk4::Rk4, rk45::Rk45, ab2::Ab2, am2::Am2},
+    methods::{ab2::Ab2, am2::Am2, euler::Euler, rk4::Rk4, rk45::Rk45},
     soe::{Soe, Soe2, Soe2Builder},
     vector::{Vector, Vector2, Vector3, Vector5, Vector7},
 };
@@ -64,7 +64,7 @@ impl TwoBodyReader<2> {
 
         let body1 = ((self.a * data[0] + self.b) - r * self.m2) / (self.m1 + self.m2);
 
-        let body2 = ((self.a * data[0] + self.b) - r * self.m2) / (self.m1 + self.m2);
+        let body2 = ((self.a * data[0] + self.b) + r * self.m2) / (self.m1 + self.m2);
 
         Position { body1, body2 }
     }
@@ -76,7 +76,7 @@ impl TwoBodyReader<3> {
 
         let body1 = ((self.a * data[0] + self.b) - r * self.m2) / (self.m1 + self.m2);
 
-        let body2 = ((self.a * data[0] + self.b) - r * self.m2) / (self.m1 + self.m2);
+        let body2 = ((self.a * data[0] + self.b) + r * self.m2) / (self.m1 + self.m2);
 
         Position { body1, body2 }
     }
@@ -158,15 +158,28 @@ impl TwoBodySystem<2> {
         Euler::new(self.get_init(), self.generate_soe(), h)
     }
 
-    pub fn construct_rk45(&self, h: VType, e: VType, max: VType) -> impl Iterator<Item = Vector<VType, 5>> {
+    pub fn construct_rk45(
+        &self,
+        h: VType,
+        e: VType,
+        max: VType,
+    ) -> impl Iterator<Item = Vector<VType, 5>> {
         Rk45::new(self.get_init(), self.generate_soe(), h, e, max)
     }
 
-    pub fn construct_ab2(&self, h: VType, init2: Vector<VType, 5>) -> impl Iterator<Item = Vector<VType, 5>> {
+    pub fn construct_ab2(
+        &self,
+        h: VType,
+        init2: Vector<VType, 5>,
+    ) -> impl Iterator<Item = Vector<VType, 5>> {
         Ab2::new(self.get_init(), init2, self.generate_soe(), h)
     }
 
-    pub fn construct_am2(&self, h: VType, init2: Vector<VType, 5>) -> impl Iterator<Item = Vector<VType, 5>> {
+    pub fn construct_am2(
+        &self,
+        h: VType,
+        init2: Vector<VType, 5>,
+    ) -> impl Iterator<Item = Vector<VType, 5>> {
         Am2::new(self.get_init(), init2, self.generate_soe(), h)
     }
 }
@@ -240,15 +253,28 @@ impl TwoBodySystem<3> {
         Euler::new(self.get_init(), self.generate_soe(), h)
     }
 
-    pub fn construct_rk45(&self, h: VType, e: VType, max: VType) -> impl Iterator<Item = Vector<VType, 7>> {
+    pub fn construct_rk45(
+        &self,
+        h: VType,
+        e: VType,
+        max: VType,
+    ) -> impl Iterator<Item = Vector<VType, 7>> {
         Rk45::new(self.get_init(), self.generate_soe(), h, e, max)
     }
 
-    pub fn construct_ab2(&self, h: VType, init2: Vector<VType, 7>) -> impl Iterator<Item = Vector<VType, 7>> {
+    pub fn construct_ab2(
+        &self,
+        h: VType,
+        init2: Vector<VType, 7>,
+    ) -> impl Iterator<Item = Vector<VType, 7>> {
         Ab2::new(self.get_init(), init2, self.generate_soe(), h)
     }
 
-    pub fn construct_am2(&self, h: VType, init2: Vector<VType, 7>) -> impl Iterator<Item = Vector<VType, 7>> {
+    pub fn construct_am2(
+        &self,
+        h: VType,
+        init2: Vector<VType, 7>,
+    ) -> impl Iterator<Item = Vector<VType, 7>> {
         Am2::new(self.get_init(), init2, self.generate_soe(), h)
     }
 }

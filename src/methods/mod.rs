@@ -1,10 +1,10 @@
 use crate::soe::Soe;
 
+pub mod ab2;
+pub mod am2;
 pub mod euler;
 pub mod rk4;
 pub mod rk45;
-pub mod ab2;
-pub mod am2;
 
 fn call_soe<T, S>(soe: &mut S, args: &T) -> T
 where
