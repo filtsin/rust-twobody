@@ -1,8 +1,5 @@
 use crate::soe::Soe;
-use ndarray::{
-    iter::IndexedIterMut, ArrayView1, Dimension, IntoDimension, IntoNdProducer, Ix1, NdProducer,
-    Zip,
-};
+
 use std::{
     fmt::Debug,
     ops::{Div, Index, IndexMut, Mul},

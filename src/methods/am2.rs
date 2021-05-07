@@ -1,5 +1,5 @@
 use crate::soe::Soe;
-use ndarray::Zip;
+
 use std::{
     iter::Iterator,
     ops::{Add, Div, Mul, Sub},

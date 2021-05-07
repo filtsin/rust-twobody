@@ -1,6 +1,5 @@
-use ndarray::Zip;
+use std::fmt::Debug;
 use std::fmt::Display;
-use std::{fmt::Debug, marker::PhantomData, ops::Deref};
 
 use crate::{
     methods::{ab2::Ab2, am2::Am2, euler::Euler, rk4::Rk4, rk45::Rk45},
@@ -64,7 +63,7 @@ impl TwoBodyReader<2> {
 
         let body1 = ((self.a * data[0] + self.b) - r * self.m2) / (self.m1 + self.m2);
 
-        let body2 = ((self.a * data[0] + self.b) + r * self.m2) / (self.m1 + self.m2);
+        let body2 = ((self.a * data[0] + self.b) + r * self.m1) / (self.m1 + self.m2);
 
         Position { body1, body2 }
     }
@@ -76,7 +75,7 @@ impl TwoBodyReader<3> {
 
         let body1 = ((self.a * data[0] + self.b) - r * self.m2) / (self.m1 + self.m2);
 
-        let body2 = ((self.a * data[0] + self.b) + r * self.m2) / (self.m1 + self.m2);
+        let body2 = ((self.a * data[0] + self.b) + r * self.m1) / (self.m1 + self.m2);
 
         Position { body1, body2 }
     }
@@ -96,7 +95,7 @@ impl TwoBodySystem<2> {
         };
 
         let f2 = move |args: &Vector<VType, 5>| {
-            let mut result = Vector::<VType, 2>::new();
+            let _result = Vector::<VType, 2>::new();
             let r: Vector<VType, 2> = [args[1], args[2]].into();
 
             let sum_sq = r[0].powi(2) + r[1].powi(2);
@@ -192,7 +191,7 @@ impl TwoBodySystem<3> {
         };
 
         let f2 = move |args: &Vector<VType, 7>| {
-            let mut result = Vector::<VType, 3>::new();
+            let _result = Vector::<VType, 3>::new();
             let r: Vector<VType, 3> = [args[1], args[2], args[3]].into();
 
             let sum_sq = r[0].powi(2) + r[1].powi(2) + r[2].powi(3);

@@ -1,10 +1,6 @@
-use ndarray::{ArrayView1, ArrayViewMut1, IntoNdProducer, Ix1, NdProducer};
+use std::convert::{AsMut, AsRef, From};
 use std::fmt::Display;
 use std::ops::{Add, Deref, DerefMut, Div, Mul, Sub};
-use std::{
-    convert::{AsMut, AsRef, From},
-    ops::AddAssign,
-};
 
 #[derive(Debug, Clone, Copy)]
 pub struct Vector<T, const N: usize> {
