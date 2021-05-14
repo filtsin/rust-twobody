@@ -64,10 +64,11 @@ impl Kepler {
         dbg!(n);
 
         let nu = if scalar_mul(r, v) >= 0.0 {
-            angle_between(e_vec, r) 
+            angle_between(e_vec, r).acos()
         } else {
-            2.0 * PI - angle_between(e_vec, r) 
+            2.0 * PI - angle_between(e_vec, r).acos()
         };
+
 
         dbg!(nu);
 
@@ -79,16 +80,19 @@ impl Kepler {
         // 3. Determine the orbit eccentricity e and the eccentric anomaly E
         let e = vec_len(e_vec);
         assert!(e < 1.0);
-        let E = 2.0 * ((nu / 2.0).atan() / ((1.0 + e) / (1.0 - e)).sqrt());
+        let E = 2.0 * ((nu / 2.0).tan() / ((1.0 + e) / (1.0 - e)).sqrt()).atan();
 
         dbg!(e);
         dbg!(E);
 
         // 4. Obtain the longitute of ascending node omega
         // and the argument of periapsis w
-        let inclination = (h[2] / vec_len(h)).acos();
 
-        let omega = if inclination == 0.0 || inclination == PI {
+        dbg!(i);
+
+        dbg!(i == PI);
+
+        let omega = if i.abs() < 0.0001 || i == PI {
             0.0
         } else {
             let res = (n[0] / vec_len(n)).acos();
@@ -101,15 +105,15 @@ impl Kepler {
 
         dbg!(omega);
 
-        let w = if vec_len(e_vec) == 0.0 {
+        let w = if e.abs() < 0.0001 {
             0.0
         } else {
-            let res = if inclination == 0.0 || inclination == PI {
+            let res = if i.abs() < 0.0001 || i == PI {
                 e_vec[1].atan2(e_vec[0])
             } else {
-                angle_between(n, e_vec)
+                angle_between(n, e_vec).acos()
             };
-            if e_vec[2] < 0.0 {
+            if e_vec[2] < 0.0 || i == PI {
                 2.0 * PI - res
             } else {
                 res
@@ -128,7 +132,9 @@ impl Kepler {
 
         dbg!(a);
 
-        Self { a, e, w, omega, i, M, mu, t0: 0.0, t: 0.0 + step, step }
+        dbg!(step);
+
+        Self { a, e, w, omega, i, M, mu, t0: 0.0, t: 0.0, step }
     }
 }
 
@@ -150,17 +156,17 @@ impl Iterator for Kepler {
         let mut F = E - self.e * E.sin() - Mt;
 
         let max_iter = 30;
-        let delta = 0.00001;
+        let delta = 0.00000001;
 
         for i in 0..max_iter {
             E = E - F / (1.0 - self.e * E.cos());
             F = E - self.e * E.sin() - Mt;
             if F.abs() < delta { break; }
         }
-        
+
 
         // 3. Obtain the true anomaly nut
-        let nut = 2.0 * ((1.0 + self.e).sqrt() * (E / 2.0).sin()).atan2((1.0 - self.e).sqrt() * (E / 2.0));
+        let nut = 2.0 * ((1.0 + self.e).sqrt() * (E / 2.0).sin()).atan2((1.0 - self.e).sqrt() * (E / 2.0).cos());
 
         // 4. Use the eccentric anomaly to get the distance to the central body with
         let rc = self.a * (1.0 - self.e * E.cos());
@@ -177,8 +183,6 @@ impl Iterator for Kepler {
             + ot[1] * (self.w.cos() * self.i.cos() * self.omega.cos() - self.w.sin() * self.omega.sin());
 
         let z = ot[0] * (self.w.sin() * self.i.sin()) + ot[1] * (self.w.cos() * self.i.sin());
-
-
 
         self.t += self.step;
         

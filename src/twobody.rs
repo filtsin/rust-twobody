@@ -188,7 +188,7 @@ impl TwoBodySystem<2> {
         h: VType
     ) -> impl Iterator<Item = Vector<VType, 5>> {
         let init = self.get_init();
-        Kepler::new([init[1], init[2], 0.0].into(), [init[3], init[4], 0.0].into(), self.g * self.body1.m * 10.0, h)
+        Kepler::new([init[1], init[2], 0.0].into(), [init[3], init[4], 0.0].into(), self.g * (self.body1.m + self.body2.m), h)
     }
 }
 

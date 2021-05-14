@@ -32,7 +32,8 @@ fn main() {
 
     // Choose method for solving
     let h = 0.001;
-    let mut rk4_solver = system.construct_rk45(h, 0.0000001, 1000000.0);
+    let mut solver = system.construct_rk4(h);
+    let mut solver = system.construct_rk45(h, 0.0000001, 100000.0);
 
     // Solver impl `Iterator` so we can just call next
     // to get some values
@@ -45,10 +46,10 @@ fn main() {
     
     let mut kepler = system.construct_kepler(h);
 
-    let limit = 50000;
+    let limit = 500000;
 
     for i in 0..limit {
-        let solve_step = kepler.next().unwrap();
+        let solve_step = solver.next().unwrap();
         let position = reader.get(solve_step);
         println!("{}", position);
     }
