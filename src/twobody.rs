@@ -5,9 +5,10 @@ use crate::{
     methods::{ab2::Ab2, am2::Am2, euler::Euler, rk4::Rk4, rk45::Rk45},
     soe::{Soe, Soe2, Soe2Builder},
     vector::{Vector, Vector2, Vector3, Vector5, Vector7},
+    kepler::Kepler
 };
 
-type VType = f64;
+pub type VType = f64;
 
 /// One of the body with initial parameters
 #[derive(Debug, Clone, Copy)]
@@ -180,6 +181,14 @@ impl TwoBodySystem<2> {
         init2: Vector<VType, 5>,
     ) -> impl Iterator<Item = Vector<VType, 5>> {
         Am2::new(self.get_init(), init2, self.generate_soe(), h)
+    }
+
+    pub fn construct_kepler(
+        &self,
+        h: VType
+    ) -> impl Iterator<Item = Vector<VType, 5>> {
+        let init = self.get_init();
+        Kepler::new([init[1], init[2], 0.0].into(), [init[3], init[4], 0.0].into(), self.g * self.body1.m * 10.0, h)
     }
 }
 

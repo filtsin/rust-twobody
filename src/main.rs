@@ -2,28 +2,22 @@ mod methods;
 mod soe;
 mod twobody;
 mod vector;
+mod kepler;
 
-use methods::euler::Euler;
-use methods::rk4::Rk4;
-use methods::rk45::Rk45;
-use methods::ab2::Ab2;
-use methods::am2::Am2;
-use soe::{SimpleSoe, SimpleSoeBuilder, Soe};
-use twobody::{Body2d, TwoBodyReader2d, TwoBodySystem2d};
-use vector::{Vector, Vector1, Vector2};
+use twobody::{Body2d, TwoBodySystem2d};
 
 fn main() {
 // Create bodies
     let body1 = Body2d {
-        m: 5.0,
+        m: 10.0,
         pos: [0.0, 0.0].into(),
-        velocity: [0.5, 0.0].into()
+        velocity: [0.0, 0.0].into()
     };
 
     let body2 = Body2d {
-        m: 5.0,
+        m: 0.001,
         pos: [1.0, 1.0].into(),
-        velocity: [-0.5, 0.0].into()
+        velocity: [1.0, 0.0].into()
     };
 
     let g = 0.1;
@@ -48,11 +42,13 @@ fn main() {
     // ```
     // let result: Vec<_> = rk4_solver.take(10).collect();
     // ```
+    
+    let mut kepler = system.construct_kepler(h);
 
     let limit = 50000;
 
     for i in 0..limit {
-        let solve_step = rk4_solver.next().unwrap();
+        let solve_step = kepler.next().unwrap();
         let position = reader.get(solve_step);
         println!("{}", position);
     }

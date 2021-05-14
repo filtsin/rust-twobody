@@ -1,6 +1,6 @@
 use std::convert::{AsMut, AsRef, From};
 use std::fmt::Display;
-use std::ops::{Add, Deref, DerefMut, Div, Mul, Sub};
+use std::ops::{Add, Deref, DerefMut, Div, Mul, Sub, Neg};
 
 #[derive(Debug, Clone, Copy)]
 pub struct Vector<T, const N: usize> {
@@ -140,6 +140,21 @@ where
             result[i] = self[i] - rhs[i];
         }
         result
+    }
+}
+
+impl<T> Mul for Vector<T, 3>
+where
+    T: Copy + Mul<Output = T> + Sub<Output = T>
+{
+    type Output = Self;
+
+    fn mul(self, rhs: Self) -> Self::Output {
+        let i = self[1] * rhs[2] - self[2] * rhs[1];
+        let j = rhs[0] * self[2] -self[0] * rhs[2];
+        let k = self[0] * rhs[1] - self[1] * rhs[0];
+
+        [i, j, k].into()
     }
 }
 
