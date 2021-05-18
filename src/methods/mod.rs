@@ -16,7 +16,7 @@ where
     result
 }
 
-fn abs<T>(v: &T) -> f64
+pub fn abs<T>(v: &T) -> f64
 where
     T: AsRef<[f64]>,
 {

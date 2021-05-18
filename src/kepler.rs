@@ -134,7 +134,11 @@ impl Kepler {
 
         dbg!(step);
 
-        Self { a, e, w, omega, i, M, mu, t0: 0.0, t: 0.0, step }
+        Self { a, e, w, omega, i, M, mu, t0: 0.0, t: 0.0 + step, step }
+    }
+
+    pub fn set_current_time(&mut self, t: f64) {
+        self.t = t;
     }
 }
 

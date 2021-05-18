@@ -2,6 +2,8 @@ use super::{abs, call_soe};
 use crate::soe::Soe;
 use std::iter::Iterator;
 use std::ops::{Add, Div, Mul, Sub};
+use crate::kepler::Kepler;
+use crate::vector::Vector5;
 
 pub struct Rk45<T, S> {
     init: T,
@@ -88,9 +90,9 @@ where
 
         next_cap.as_mut()[0] = 0.0;
 
-        let r = abs(&(next_cap - next)) / self.h;
+        let r = abs(&(next_cap - next));
 
-        let sigma = (self.e / r).powf(0.25) * 0.84;
+        let sigma = (self.e / r).powf(0.2) * 0.9 ;
 
         if r <= self.e {
             next.as_mut()[0] = self.init.as_ref()[0] + self.h;
