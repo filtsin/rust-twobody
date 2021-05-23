@@ -140,6 +140,10 @@ impl Kepler {
     pub fn set_current_time(&mut self, t: f64) {
         self.t = t;
     }
+
+    pub fn set_init_time(&mut self, t: f64) {
+        self.t0 = t;
+    }
 }
 
 impl Iterator for Kepler {

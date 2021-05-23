@@ -1,9 +1,10 @@
 use super::{abs, call_soe};
-use crate::soe::Soe;
+use crate::{soe::Soe, vector::Vector2};
 use std::iter::Iterator;
 use std::ops::{Add, Div, Mul, Sub};
 use crate::kepler::Kepler;
 use crate::vector::Vector5;
+use std::fmt::Debug;
 
 pub struct Rk45<T, S> {
     init: T,
@@ -28,7 +29,7 @@ impl<T, S> Rk45<T, S> {
 impl<T, S> Iterator for Rk45<T, S>
 where
     S: Soe<Args = T>,
-    T: Default
+    T: Default + Debug
         + Copy
         + AsMut<[f64]>
         + AsRef<[f64]>
@@ -96,6 +97,25 @@ where
 
         if r <= self.e {
             next.as_mut()[0] = self.init.as_ref()[0] + self.h;
+            // local
+            //let next_cap_r: Vector2 = [next_cap.as_ref()[1], next_cap.as_ref()[2]].into();
+            let next_r: Vector2 = [next.as_ref()[1], next.as_ref()[2]].into();
+            //println!("{},{}", next.as_ref()[0], abs(&(next_r - next_cap_r)));
+
+            let mut kepler = Kepler::new([self.init.as_ref()[1], self.init.as_ref()[2], 0.0].into(),
+                                         [self.init.as_ref()[3], self.init.as_ref()[4], 0.0].into(),
+                                         0.1 * 10.0,
+                                         self.h);
+            kepler.set_init_time(self.init.as_ref()[0]);
+            kepler.set_current_time(next.as_ref()[0]);
+
+
+            let result = kepler.next().unwrap();
+            let result_r: Vector2 = [result[1], result[2]].into();
+
+            println!("{},{}", next.as_ref()[0], abs(&(result_r - next_r)));
+
+
             self.init = next;
             self.h *= sigma;
             Some(next)

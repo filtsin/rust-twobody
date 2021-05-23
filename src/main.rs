@@ -58,8 +58,6 @@ fn main() {
         let solve_step = match solver.next() {
             Some(v) => v,
             None => { exit(0) }
-        };
-        let position = reader.get(solve_step);
-        println!("{},{},{}", solve_step[0], solve_step[1], solve_step[2]);
+        }; 
     }
 }
